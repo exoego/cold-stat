@@ -1,14 +1,14 @@
-use std::time::Duration;
 use crate::stats::Stats;
 use async_recursion::async_recursion;
 use aws_sdk_cloudwatchlogs as cloudwatch_logs;
 use aws_sdk_cloudwatchlogs::types::QueryStatus;
-use log::{debug, info};
+use log::info;
+use std::time::Duration;
 
 const QUERY_STRING: &str = "
     fields @memorySize / 1000000 as memorySize
     | filter @message like /(?i)(Init Duration)/
-    | stats count() as cold_starts,
+    | stats count() as count,
     min(@initDuration ) as min,
     max(@initDuration ) as max,
     pct(@initDuration, 25) as p50,
@@ -37,10 +37,8 @@ impl LambdaAnalyzer {
         }
     }
 
-
     pub async fn analyze(&self) -> Result<Stats, anyhow::Error> {
-        let log_group_name =
-            "/aws/lambda/logs-export-development-aws".to_string();
+        let log_group_name = "/aws/lambda/logs-export-development-aws".to_string();
         // format!("/aws/lambda/{}", self.function_name);
         info!("Analyzing logs in log group: {}", log_group_name);
         let query_id = self
@@ -77,12 +75,15 @@ impl LambdaAnalyzer {
                     info!("Query is complete, parsing results");
                     let mut stats = Stats::empty();
                     query_results
-                        .results.clone()
+                        .results
+                        .clone()
                         .unwrap()
                         .iter()
-                        .flatten().for_each(|result| {
-                        stats.update(result);
-                    });
+                        .flatten()
+                        .for_each(|result| {
+                            stats.update(result);
+                        });
+                    info!("Cold starts: {}", stats.count);
                     Ok(stats.clone())
                 }
                 _ => {
