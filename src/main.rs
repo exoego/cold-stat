@@ -1,10 +1,14 @@
+mod lambda_analyzer;
 mod lambda_invoker;
+mod stats;
 
+use crate::lambda_analyzer::LambdaAnalyzer;
 use crate::lambda_invoker::LambdaInvoker;
 use aws_config::BehaviorVersion;
-use aws_sdk_lambda::Client;
+use aws_sdk_cloudwatchlogs as logs;
+use aws_sdk_lambda as lambda;
 use clap::Parser;
-use log::LevelFilter;
+use log::{info, LevelFilter};
 use simple_logger::SimpleLogger;
 
 #[derive(Parser, Debug)]
@@ -34,9 +38,17 @@ async fn main() -> Result<(), anyhow::Error> {
         .unwrap();
 
     let config = aws_config::load_defaults(BehaviorVersion::v2023_11_09()).await;
-    let lambda = Client::new(&config);
+    let lambda = lambda::Client::new(&config);
     let lambda_invoker = LambdaInvoker::new(lambda.clone(), function.clone(), payload);
 
+    let start_time = chrono::Utc::now().timestamp() - 100000000;
+    // let start_time = chrono::Utc::now().timestamp() - 1000000000;
     lambda_invoker.iterate(iterations).await?;
+
+    let logs = logs::Client::new(&config);
+    let lambda_analyzer = LambdaAnalyzer::new(logs, function, start_time);
+    let stats = lambda_analyzer.analyze().await?;
+
+    info!("{:?}", stats);
     Ok(())
 }
