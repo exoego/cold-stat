@@ -4,7 +4,7 @@ use crate::lambda_invoker::LambdaInvoker;
 use aws_config::BehaviorVersion;
 use aws_sdk_lambda::Client;
 use clap::Parser;
-use log::{info, LevelFilter};
+use log::LevelFilter;
 use simple_logger::SimpleLogger;
 
 #[derive(Parser, Debug)]
@@ -38,7 +38,5 @@ async fn main() -> Result<(), anyhow::Error> {
     let lambda_invoker = LambdaInvoker::new(lambda.clone(), function.clone(), payload);
 
     lambda_invoker.iterate(iterations).await?;
-
-    info!("Done");
     Ok(())
 }

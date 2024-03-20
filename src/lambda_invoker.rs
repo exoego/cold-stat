@@ -30,12 +30,14 @@ impl LambdaInvoker {
             .map(|a| a.variables.unwrap_or_default())
             .unwrap_or_default();
 
-        for _ in 0..iterations {
+        for i in 1..(iterations + 1) {
+            info!("Iteration {i}/{iterations}");
             env.insert("cold_start_uuid".to_string(), Uuid::new_v4().to_string());
             self.refresh_lambda(env.clone()).await?;
             self.wait_for_function_ready().await?;
             self.invoke().await?;
         }
+        info!("Done");
         Ok(())
     }
 
