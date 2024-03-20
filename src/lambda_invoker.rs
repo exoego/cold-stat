@@ -1,6 +1,5 @@
 use anyhow::anyhow;
 use aws_sdk_lambda as lambda;
-use aws_sdk_lambda::operation::get_function::GetFunctionOutput;
 use aws_sdk_lambda::operation::get_function_configuration::GetFunctionConfigurationOutput;
 use aws_sdk_lambda::primitives::Blob;
 use aws_sdk_lambda::types::{Environment, LastUpdateStatus, State};
@@ -49,7 +48,7 @@ impl LambdaInvoker {
             .payload(self.payload.clone())
             .send()
             .await?;
-        info!("Function error {:?}", result.function_error);
+        info!("Function error: {:?}", result.function_error);
         Ok(())
     }
 
