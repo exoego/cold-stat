@@ -73,7 +73,7 @@ impl LambdaAnalyzer {
             Some(status) => match status {
                 QueryStatus::Complete => {
                     info!("Query is complete, parsing results");
-                    let mut stats = Stats::empty();
+                    let mut stats = Stats::default();
                     query_results
                         .results
                         .clone()
@@ -83,7 +83,6 @@ impl LambdaAnalyzer {
                         .for_each(|result| {
                             stats.update(result);
                         });
-                    info!("Cold starts: {}", stats.count);
                     Ok(stats.clone())
                 }
                 _ => {

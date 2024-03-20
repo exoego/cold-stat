@@ -1,7 +1,7 @@
 use aws_sdk_cloudwatchlogs::types::ResultField;
 use tabled::Tabled;
 
-#[derive(Debug, Copy, Clone, Tabled)]
+#[derive(Debug, Clone, Default, Tabled)]
 pub struct Stats {
     pub count: u32,
     pub min: f32,
@@ -14,19 +14,6 @@ pub struct Stats {
 }
 
 impl Stats {
-    pub fn empty() -> Self {
-        Self {
-            count: 0,
-            min: 0.0,
-            p50: 0.0,
-            p75: 0.0,
-            p99: 0.0,
-            p995: 0.0,
-            p999: 0.0,
-            max: 0.0,
-        }
-    }
-
     pub fn update(&mut self, result: &ResultField) -> () {
         match result.field().unwrap().trim() {
             "count" => {
