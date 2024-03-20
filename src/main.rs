@@ -1,11 +1,11 @@
 mod lambda_invoker;
 
+use crate::lambda_invoker::LambdaInvoker;
 use aws_config::BehaviorVersion;
 use aws_sdk_lambda::Client;
 use clap::Parser;
 use log::{info, LevelFilter};
 use simple_logger::SimpleLogger;
-use crate::lambda_invoker::LambdaInvoker;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -28,7 +28,10 @@ async fn main() -> Result<(), anyhow::Error> {
         payload,
     } = Args::parse();
 
-    SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
+    SimpleLogger::new()
+        .with_level(LevelFilter::Info)
+        .init()
+        .unwrap();
 
     let config = aws_config::load_defaults(BehaviorVersion::v2023_11_09()).await;
     let lambda = Client::new(&config);

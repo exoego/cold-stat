@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::time::Duration;
 use anyhow::anyhow;
 use aws_sdk_lambda as lambda;
 use aws_sdk_lambda::operation::get_function::GetFunctionOutput;
@@ -7,6 +5,8 @@ use aws_sdk_lambda::operation::get_function_configuration::GetFunctionConfigurat
 use aws_sdk_lambda::primitives::Blob;
 use aws_sdk_lambda::types::{Environment, LastUpdateStatus, State};
 use log::{info, warn};
+use std::collections::HashMap;
+use std::time::Duration;
 use uuid::Uuid;
 
 pub struct LambdaInvoker {
@@ -16,11 +16,7 @@ pub struct LambdaInvoker {
 }
 
 impl LambdaInvoker {
-    pub fn new(
-        lambda_client: lambda::Client,
-        function_name: String,
-        payload: String,
-    ) -> Self {
+    pub fn new(lambda_client: lambda::Client, function_name: String, payload: String) -> Self {
         Self {
             lambda_client,
             function_name,
@@ -30,7 +26,10 @@ impl LambdaInvoker {
 
     pub async fn iterate(&self, iterations: u8) -> Result<(), anyhow::Error> {
         let config = self.get_function_configuration().await?;
-        let mut env = config.environment.map(|a| a.variables.unwrap_or_default()).unwrap_or_default();
+        let mut env = config
+            .environment
+            .map(|a| a.variables.unwrap_or_default())
+            .unwrap_or_default();
 
         for _ in 0..iterations {
             env.insert("cold_start_uuid".to_string(), Uuid::new_v4().to_string());
@@ -43,7 +42,8 @@ impl LambdaInvoker {
 
     async fn invoke(&self) -> Result<(), anyhow::Error> {
         info!("Invoking function");
-        let result = self.lambda_client
+        let result = self
+            .lambda_client
             .invoke()
             .function_name(self.function_name.clone())
             .payload(self.payload.clone())
@@ -53,7 +53,9 @@ impl LambdaInvoker {
         Ok(())
     }
 
-    async fn get_function_configuration(&self) -> Result<GetFunctionConfigurationOutput, anyhow::Error> {
+    async fn get_function_configuration(
+        &self,
+    ) -> Result<GetFunctionConfigurationOutput, anyhow::Error> {
         info!("Getting function configuration");
         self.lambda_client
             .get_function_configuration()
@@ -63,21 +65,16 @@ impl LambdaInvoker {
             .map_err(anyhow::Error::from)
     }
 
-    async fn get_function(&self) -> Result<GetFunctionOutput, anyhow::Error> {
-        info!("Getting function");
-        self.lambda_client
-            .get_function()
-            .function_name(self.function_name.clone())
-            .send()
-            .await
-            .map_err(anyhow::Error::from)
-    }
-
     async fn refresh_lambda(&self, env: HashMap<String, String>) -> Result<(), anyhow::Error> {
         self.lambda_client
             .update_function_configuration()
             .function_name(self.function_name.to_string())
-            .environment(Environment::builder().set_variables(Some(env.clone())).build()).send()
+            .environment(
+                Environment::builder()
+                    .set_variables(Some(env.clone()))
+                    .build(),
+            )
+            .send()
             .await
             .map(|_| ())
             .map_err(anyhow::Error::from)
@@ -92,47 +89,34 @@ impl LambdaInvoker {
         Ok(())
     }
 
-    async fn is_function_ready(
-        &self,
-    ) -> Result<bool, anyhow::Error> {
-        match self.get_function().await {
-            Ok(func) => {
-                if let Some(config) = func.configuration() {
-                    if let Some(state) = config.state() {
-                        info!("Checking if function is active: {state}");
-                        if !matches!(state, State::Active) {
-                            return Ok(false);
-                        }
-                    }
-                    match config.last_update_status() {
-                        Some(last_update_status) => {
-                            info!("Checking if function is ready: {last_update_status}");
-                            match last_update_status {
-                                LastUpdateStatus::Successful => {
-                                    return Ok(true);
-                                }
-                                LastUpdateStatus::Failed | LastUpdateStatus::InProgress => {
-                                    return Ok(false);
-                                }
-                                unknown => {
-                                    warn!("LastUpdateStatus unknown: {unknown}");
-                                    return Err(anyhow!(
-                                        "Unknown LastUpdateStatus, fn config is {config:?}"
-                                    ));
-                                }
-                            }
-                        }
-                        None => {
-                            warn!("Missing last update status");
-                            return Ok(false);
-                        }
-                    };
-                }
-            }
-            Err(e) => {
-                warn!("Could not get function while waiting: {e}");
+    async fn is_function_ready(&self) -> Result<bool, anyhow::Error> {
+        let config = self.get_function_configuration().await?;
+        if let Some(state) = config.state() {
+            info!("Checking if function is active: {state}");
+            if !matches!(state, State::Active) {
+                return Ok(false);
             }
         }
-        Ok(false)
+        match config.last_update_status() {
+            Some(last_update_status) => {
+                info!("Checking if last update is successful: {last_update_status}");
+                match last_update_status {
+                    LastUpdateStatus::Successful => {
+                        return Ok(true);
+                    }
+                    LastUpdateStatus::Failed | LastUpdateStatus::InProgress => {
+                        return Ok(false);
+                    }
+                    unknown => {
+                        warn!("LastUpdateStatus unknown: {unknown}");
+                        return Err(anyhow!("Unknown LastUpdateStatus, fn config is {config:?}"));
+                    }
+                }
+            }
+            None => {
+                warn!("Missing last update status");
+                return Ok(false);
+            }
+        };
     }
 }
