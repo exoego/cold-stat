@@ -1,0 +1,15 @@
+[package]
+name = "measure-cold-start"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aws-config = "1.1.8"
+aws-sdk-cloudwatchlogs = "1.20.0"
+aws-sdk-lambda = "1.17.0"
+clap = { version = "4.5.3", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1.8.0", features = ["v4"] }
+anyhow = "1.0.81"
+log = "0.4.21"
+simple_logger = "4.3.3"
