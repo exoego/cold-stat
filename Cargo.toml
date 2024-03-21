@@ -2,6 +2,14 @@
 name = "cold-stat"
 version = "0.1.1"
 edition = "2021"
+authors = ["TATSUNO Yasuhiro <ytatsuno.jp@gmail..com>"]
+license = "MIT"
+description = "A CLI tool to statically analyze cold start of AWS Lambda functions."
+readme = "scripts/README.md"
+homepage = "https://github.com/exoego/cold-stat"
+repository = "https://github.com/exoego/cold-stat"
+keywords = ["cli", "aws", "lambda"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 aws-config = "1.1.8"
