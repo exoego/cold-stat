@@ -30,18 +30,26 @@ impl LambdaInvoker {
             .map(|a| a.variables.unwrap_or_default())
             .unwrap_or_default();
 
+        let mut num_failures: u8 = 0;
         for i in 1..(iterations + 1) {
             info!("Iteration {i}/{iterations}");
             env.insert("cold_start_uuid".to_string(), Uuid::new_v4().to_string());
             self.refresh_lambda(env.clone()).await?;
             self.wait_for_function_ready().await?;
-            self.invoke().await?;
+            if self.invoke().await? == false {
+                num_failures += 1;
+                if num_failures >= 3 {
+                    return Err(anyhow!(
+                        "Lambda failed three times. Check the payload and function"
+                    ));
+                }
+            }
         }
         info!("Done");
         Ok(())
     }
 
-    async fn invoke(&self) -> Result<(), anyhow::Error> {
+    async fn invoke(&self) -> Result<bool, anyhow::Error> {
         info!("Invoking function");
         let result = self
             .lambda_client
@@ -51,7 +59,7 @@ impl LambdaInvoker {
             .send()
             .await?;
         info!("Function error: {:?}", result.function_error);
-        Ok(())
+        Ok(result.function_error.is_none())
     }
 
     async fn get_function_configuration(

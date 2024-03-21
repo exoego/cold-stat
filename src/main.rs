@@ -8,9 +8,10 @@ use aws_config::BehaviorVersion;
 use aws_sdk_cloudwatchlogs as logs;
 use aws_sdk_lambda as lambda;
 use clap::Parser;
-use log::LevelFilter;
+use log::{info, LevelFilter};
 use simple_logger::SimpleLogger;
 use std::iter;
+use std::time::Duration;
 use tabled::settings::object::{Columns, Rows};
 use tabled::settings::style::{BorderColor, LineChar, Offset};
 use tabled::settings::themes::Colorization;
@@ -32,7 +33,12 @@ struct Args {
     #[arg(long, default_value = None, help = "Regex to filter CloudWatch log group stream. Useful when log group is shared by multiple functions")]
     log_stream_filter: Option<String>,
 
-    #[arg(short, long, default_value_t = 1)]
+    #[arg(
+        short,
+        long,
+        default_value_t = 100,
+        help = "Number of iterations to invoke the function. It is recommended be dozens at least. Otherwise, the number of cold start is no"
+    )]
     iterations: u8,
 
     #[arg(
@@ -66,8 +72,11 @@ async fn main() -> Result<(), anyhow::Error> {
     let lambda = lambda::Client::new(&config);
     let lambda_invoker = LambdaInvoker::new(lambda.clone(), function.clone(), payload);
 
-    let start_time = chrono::Utc::now().timestamp() - 500000;
+    let start_time = chrono::Utc::now().timestamp();
     lambda_invoker.iterate(iterations).await?;
+
+    info!("Waiting 30 seconds log buffer to be flushed");
+    tokio::time::sleep(Duration::from_secs(30)).await;
 
     let logs = logs::Client::new(&config);
     let log_group_name_ = log_group_name.unwrap_or_else(|| {
