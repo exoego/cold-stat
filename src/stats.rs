@@ -4,6 +4,7 @@ use tabled::Tabled;
 #[derive(Debug, Clone, Default, Tabled)]
 pub struct Stats {
     pub count: u32,
+    pub stddev: f32,
     pub min: f32,
     pub p50: f32,
     pub p75: f32,
@@ -11,7 +12,6 @@ pub struct Stats {
     pub p995: f32,
     pub p999: f32,
     pub max: f32,
-    pub stddev: f32,
 }
 
 impl Stats {
