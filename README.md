@@ -2,7 +2,7 @@
 
 A CLI tool to statically analyze the initialization time, known as cold-start, of AWS Lambda functions.
 
-<img src="doc/img.png" width="855" height="104" />
+<img src="https://raw.githubusercontent.com/exoego/cold-stat/main/doc/img.png" width="855" height="104" />
 
 ## Installation
 
@@ -57,7 +57,7 @@ cold-stat [OPTIONS] --function <FUNCTION> --payload <PAYLOAD>
     - Print version
 
 ### Result
-<img src="doc/img.png" width="855" height="104" />
+<img src="https://raw.githubusercontent.com/exoego/cold-stat/main/doc/img.png" width="855" height="104" />
 
 - `mem`
   - Memory size of the function 
