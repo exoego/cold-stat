@@ -8,26 +8,8 @@ A CLI tool to statically analyze the initialization time, known as cold-start, o
 
 ## Installation
 
-WIP
-
-## Development 
-
-### Build
-
 ```bash
-git clone https://github.com/exoego/cold-stat
-cd cold-stat
-cargo build
-```
-
-### Run
-
-```baash
-cargo run -- \
-  --function=YOUR-FUNC-NAME \
-  --iterations=10 \
-  --verbose \
-  --payload='{"foo": "bar"}'
+cargo install cold-stat
 ```
 
 ## Usage
@@ -71,6 +53,26 @@ cold-stat [OPTIONS] --function <FUNCTION> --payload <PAYLOAD>
   - Percentiles of cold start time
   - For example, `p50` is 50 percentile, also known as the median
   - `p995` and `p999` are 99.5 and 99.9 percentiles, respectively
+
+## Development
+
+### Build
+
+```bash
+git clone https://github.com/exoego/cold-stat
+cd cold-stat
+cargo build
+```
+
+### Run
+
+```bash
+cargo run -- \
+  --function=YOUR-FUNC-NAME \
+  --iterations=10 \
+  --verbose \
+  --payload='{"foo": "bar"}'
+```
 
 ## Acknowledgement
 
