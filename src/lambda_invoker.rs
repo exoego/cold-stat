@@ -36,7 +36,7 @@ impl LambdaInvoker {
             env.insert("cold_start_uuid".to_string(), Uuid::new_v4().to_string());
             self.refresh_lambda(env.clone()).await?;
             self.wait_for_function_ready().await?;
-            if self.invoke().await? == false {
+            if !self.invoke().await? {
                 num_failures += 1;
                 if num_failures >= 3 {
                     return Err(anyhow!(
@@ -111,21 +111,21 @@ impl LambdaInvoker {
                 info!("Checking if last update is successful: {last_update_status}");
                 match last_update_status {
                     LastUpdateStatus::Successful => {
-                        return Ok(true);
+                        Ok(true)
                     }
                     LastUpdateStatus::Failed | LastUpdateStatus::InProgress => {
-                        return Ok(false);
+                        Ok(false)
                     }
                     unknown => {
                         warn!("LastUpdateStatus unknown: {unknown}");
-                        return Err(anyhow!("Unknown LastUpdateStatus, fn config is {config:?}"));
+                        Err(anyhow!("Unknown LastUpdateStatus, fn config is {config:?}"))
                     }
                 }
             }
             None => {
                 warn!("Missing last update status");
-                return Ok(false);
+                Ok(false)
             }
-        };
+        }
     }
 }

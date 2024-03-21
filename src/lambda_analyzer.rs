@@ -1,10 +1,8 @@
 use crate::stats::Stats;
 use async_recursion::async_recursion;
 use aws_sdk_cloudwatchlogs as cloudwatch_logs;
-use aws_sdk_cloudwatchlogs::types::{QueryStatus, ResultField};
+use aws_sdk_cloudwatchlogs::types::QueryStatus;
 use log::info;
-use std::iter::Map;
-use std::slice::Iter;
 use std::time::Duration;
 
 const QUERY_STRING: &str = "
@@ -74,7 +72,7 @@ impl LambdaAnalyzer {
             .log_group_name_pattern(self.log_group_name.to_string())
             .send()
             .await?;
-        if log_group.log_groups.unwrap_or_else(|| vec![]).is_empty() {
+        if log_group.log_groups.unwrap_or_else(Vec::new).is_empty() {
             return Err(anyhow::anyhow!(
                 "Log group {} does not exist",
                 self.log_group_name.to_string()

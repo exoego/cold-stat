@@ -16,7 +16,7 @@ pub struct Stats {
 }
 
 impl Stats {
-    pub fn update(&mut self, result: &ResultField) -> () {
+    pub fn update(&mut self, result: &ResultField) {
         match result.field().unwrap().trim() {
             "memorySize" => {
                 self.mem = result.value().unwrap().parse().unwrap();
