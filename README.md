@@ -1,0 +1,59 @@
+# cold-stat
+
+A CLI tool to statically analyze the initialization time, known as cold-start, of AWS Lambda functions.
+
+## Installation
+
+WIP
+
+## Development 
+
+### Build
+
+```bash
+git clone https://github.com/exoego/cold-stat
+cd cold-stat
+cargo build
+```
+
+### Run
+
+```baash
+cargo run -- \
+  --function=YOUR-FUNC-NAME \
+  --iterations=10 \
+  --verbose \
+  --payload='{"foo": "bar"}'
+```
+
+## Usage
+
+```
+cold-stat [OPTIONS] --function <FUNCTION> --payload <PAYLOAD>
+```
+
+### Options:
+-  `-f`, `--function <FUNCTION>`
+    - Name or ARN of function to invoke
+-  `-p`, `--payload <PAYLOAD>`
+    - JSON payload to send to the function
+-  `--log-group-name <LOG_GROUP_NAME>`
+    - Name of CloudWatch log group to analyze
+    - [default: `/aws/lambda/FUNCTION`]
+-  `--log-stream-filter <LOG_STREAM_FILTER>`
+    - Regex to filter CloudWatch log group stream. Useful when log group is shared by multiple functions
+    - [example: `/YOUR-FUNCTION-NAME/`] when log streams are named like `2021/01/01/YOUR-FUNCTION-NAME[$LATEST]`
+-  `-i`, `--iterations <ITERATIONS>`
+    - Number of iterations to invoke the function
+    - It is recommended to set `30` at least. Because the number of collected cold starts often is a bit shorter than the specified `ITERATIONS` due to eventual consistency of CloudWatch Logs
+    - [default: `100`]
+-  `-v`, `--verbose`
+    - Print debug logs if enabled
+-  `-h`, `--help`
+    - Print help
+-  `-V`, `--version`
+    - Print version
+
+## Acknowledgement
+
+- This tool is highly inspired by [lumigo-io/SAR-measure-cold-start](https://github.com/lumigo-io/SAR-measure-cold-start)

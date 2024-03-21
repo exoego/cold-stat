@@ -1,5 +1,5 @@
 [package]
-name = "defroster"
+name = "cold-stat"
 version = "0.1.0"
 edition = "2021"
 

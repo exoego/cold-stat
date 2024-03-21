@@ -37,7 +37,7 @@ struct Args {
         short,
         long,
         default_value_t = 100,
-        help = "Number of iterations to invoke the function. It is recommended be dozens at least. Otherwise, the number of cold start is no"
+        help = "Number of iterations to invoke the function. It is recommended to set 30 at least. Because the number of collected cold starts often is a bit shorter than the specified `ITERATIONS` due to eventual consistency of CloudWatch Logs."
     )]
     iterations: u8,
 
