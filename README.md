@@ -6,6 +6,16 @@ A CLI tool to statically analyze the initialization time, known as cold-start, o
 
 <img src="https://raw.githubusercontent.com/exoego/cold-stat/main/doc/img.png" width="855" height="104" />
 
+## Prerequisites
+
+- Rust toolchain is required to install the tool
+- AWS credential is required to access AWS
+- Following actions must be granted in IAM policy
+    - `lambda:GetFunctionConfiguration` to fetch the current env vars of the function
+    - `Lambda.UpdateFunctionConfiguration` to update the env vars of the function, to force cold-start
+    - `lambda:InvokeFunction` to invoke tha function
+    - `logs:StartQuery` to query CloudWatch Logs for cold start analysis
+
 ## Installation
 
 ```bash
