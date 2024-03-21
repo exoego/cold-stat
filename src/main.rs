@@ -26,8 +26,11 @@ struct Args {
     #[arg(short, long, help = "JSON payload to send to the function")]
     payload: String,
 
-    #[arg(short, long, default_value = None, help = "Name of CloudWatch log group to analyze.\n[default: /aws/lambda/FUNCTION]")]
+    #[arg(long, default_value = None, help = "Name of CloudWatch log group to analyze.\n[default: /aws/lambda/FUNCTION]")]
     log_group_name: Option<String>,
+
+    #[arg(long, default_value = None, help = "Regex to filter CloudWatch log group stream. Useful when log group is shared by multiple functions")]
+    log_stream_filter: Option<String>,
 
     #[arg(short, long, default_value_t = 1)]
     iterations: u8,
@@ -47,6 +50,7 @@ async fn main() -> Result<(), anyhow::Error> {
         function,
         log_group_name,
         iterations,
+        log_stream_filter,
         payload,
         verbose,
     } = Args::parse();
@@ -70,7 +74,7 @@ async fn main() -> Result<(), anyhow::Error> {
         let exact_name = function.split(':').last().unwrap();
         format!("/aws/lambda/{}", exact_name)
     });
-    let lambda_analyzer = LambdaAnalyzer::new(logs, log_group_name_, start_time);
+    let lambda_analyzer = LambdaAnalyzer::new(logs, log_group_name_, log_stream_filter, start_time);
     let stats = lambda_analyzer.analyze().await?;
 
     println!(

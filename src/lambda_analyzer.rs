@@ -6,8 +6,8 @@ use log::info;
 use std::time::Duration;
 
 const QUERY_STRING: &str = "
-    fields @memorySize / 1000000 as memorySize
-    | filter @message like /(?i)(Init Duration)/
+    filter @message like /(?i)(Init Duration)/
+    | fields @memorySize / 1000000 as memorySize
     | stats count() as count,
     min(@initDuration ) as min,
     max(@initDuration ) as max,
@@ -22,6 +22,7 @@ const QUERY_STRING: &str = "
 pub struct LambdaAnalyzer {
     cloudwatch_logs_client: cloudwatch_logs::Client,
     log_group_name: String,
+    query_string: String,
     start_time: i64,
 }
 
@@ -29,11 +30,16 @@ impl LambdaAnalyzer {
     pub fn new(
         cloudwatch_logs_client: cloudwatch_logs::Client,
         log_group_name: String,
+        log_stream_filter: Option<String>,
         start_time: i64,
     ) -> Self {
         Self {
             cloudwatch_logs_client,
             log_group_name,
+            query_string: log_stream_filter
+                .map(|f| format!("filter @logStream like {} |", f))
+                .unwrap_or_default()
+                + QUERY_STRING,
             start_time,
         }
     }
@@ -48,7 +54,7 @@ impl LambdaAnalyzer {
         let query_id = self
             .cloudwatch_logs_client
             .start_query()
-            .query_string(QUERY_STRING)
+            .query_string(self.query_string.to_string())
             .log_group_name(self.log_group_name.to_string())
             .start_time(self.start_time)
             .end_time(chrono::Utc::now().timestamp())
