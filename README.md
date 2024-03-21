@@ -16,6 +16,10 @@ cargo install cold-stat
 
 ```
 cold-stat [OPTIONS] --function <FUNCTION> --payload <PAYLOAD>
+
+# Example
+cold-stat --verbose --function=YOUR-FUNC-NAME --iterations=300 \
+          --payload='{"foo": "bar"}'
 ```
 
 ### Options:
