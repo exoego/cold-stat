@@ -2,6 +2,8 @@
 
 A CLI tool to statically analyze the initialization time, known as cold-start, of AWS Lambda functions.
 
+<img src="doc/img.png" width="855" height="104" />
+
 ## Installation
 
 WIP
@@ -53,6 +55,20 @@ cold-stat [OPTIONS] --function <FUNCTION> --payload <PAYLOAD>
     - Print help
 -  `-V`, `--version`
     - Print version
+
+### Result
+<img src="doc/img.png" width="855" height="104" />
+
+- `mem`
+  - Memory size of the function 
+- `count`
+  - Number of cold starts collected 
+- `stddev`, `min`, `max`
+  - Standard deviation, minimum, and maximum of cold start time respectively
+- `p50`, `p90`, `p95`, `p99`, `p995`, `p999`
+  - Percentiles of cold start time
+  - For example, `p50` is 50 percentile, also known as the median
+  - `p995` and `p999` are 99.5 and 99.9 percentiles, respectively
 
 ## Acknowledgement
 
