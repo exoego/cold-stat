@@ -1,6 +1,6 @@
 # cold-stat
 
-![Crates.io Version](https://img.shields.io/crates/v/cold-stat)
+[![Crates.io Version](https://img.shields.io/crates/v/cold-stat)](https://crates.io/crates/cold-stat)
 
 A CLI tool to statically analyze the initialization time, known as cold-start, of AWS Lambda functions.
 
