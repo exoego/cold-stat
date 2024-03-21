@@ -3,6 +3,7 @@ use tabled::Tabled;
 
 #[derive(Debug, Clone, Default, Tabled)]
 pub struct Stats {
+    pub mem: u32,
     pub count: u32,
     pub stddev: f32,
     pub min: f32,
@@ -17,6 +18,9 @@ pub struct Stats {
 impl Stats {
     pub fn update(&mut self, result: &ResultField) -> () {
         match result.field().unwrap().trim() {
+            "memorySize" => {
+                self.mem = result.value().unwrap().parse().unwrap();
+            }
             "count" => {
                 self.count = result.value().unwrap().parse().unwrap();
             }

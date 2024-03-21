@@ -86,9 +86,10 @@ async fn main() -> Result<(), anyhow::Error> {
     let lambda_analyzer = LambdaAnalyzer::new(logs, log_group_name_, log_stream_filter, start_time);
     let stats = lambda_analyzer.analyze().await?;
 
+    println!();
     println!(
         "{}",
-        Table::new(vec![stats])
+        Table::new(stats)
             .with(Style::markdown())
             .with(Modify::new(Columns::new(..)).with(LineChar::horizontal(':', Offset::End(0))),)
             .with(
@@ -103,7 +104,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .set_corner_top_right(Color::FG_WHITE)
             )
             .with(Colorization::columns(
-                iter::repeat(Color::FG_BRIGHT_CYAN).take(8)
+                iter::repeat(Color::FG_BRIGHT_CYAN).take(9)
             ))
             .modify(Rows::first(), Color::FG_BRIGHT_WHITE)
     );

@@ -1,8 +1,10 @@
 use crate::stats::Stats;
 use async_recursion::async_recursion;
 use aws_sdk_cloudwatchlogs as cloudwatch_logs;
-use aws_sdk_cloudwatchlogs::types::QueryStatus;
+use aws_sdk_cloudwatchlogs::types::{QueryStatus, ResultField};
 use log::info;
+use std::iter::Map;
+use std::slice::Iter;
 use std::time::Duration;
 
 const QUERY_STRING: &str = "
@@ -44,7 +46,7 @@ impl LambdaAnalyzer {
         }
     }
 
-    pub async fn analyze(&self) -> Result<Stats, anyhow::Error> {
+    pub async fn analyze(&self) -> Result<Vec<Stats>, anyhow::Error> {
         info!(
             "Analyzing logs in log group: {}",
             self.log_group_name.to_string()
@@ -82,7 +84,7 @@ impl LambdaAnalyzer {
     }
 
     #[async_recursion]
-    async fn query_until_complete(&self, query_id: String) -> Result<Stats, anyhow::Error> {
+    async fn query_until_complete(&self, query_id: String) -> Result<Vec<Stats>, anyhow::Error> {
         info!("Fetching query result");
         let query_results = self
             .cloudwatch_logs_client
@@ -99,17 +101,21 @@ impl LambdaAnalyzer {
             Some(status) => match status {
                 QueryStatus::Complete => {
                     info!("Query is complete, parsing results");
-                    let mut stats = Stats::default();
-                    query_results
+                    let stats: Vec<Stats> = query_results
                         .results
                         .clone()
                         .unwrap()
                         .iter()
-                        .flatten()
-                        .for_each(|result| {
-                            stats.update(result);
-                        });
-                    Ok(stats.clone())
+                        .map(|group| {
+                            let mut stat = Stats::default();
+                            group.iter().for_each(|result| {
+                                stat.update(result);
+                            });
+                            stat
+                        })
+                        .filter(|s| s.mem != 0)
+                        .collect();
+                    Ok(stats)
                 }
                 _ => {
                     info!("Query is not complete, sleeping 1s");
