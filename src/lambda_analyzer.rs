@@ -11,6 +11,7 @@ const QUERY_STRING: &str = "
     | stats count() as count,
     min(@initDuration ) as min,
     max(@initDuration ) as max,
+    stddev(@initDuration ) as stddev,
     pct(@initDuration, 25) as p50,
     pct(@initDuration, 75) as p75,
     pct(@initDuration, 99) as p99,
@@ -20,32 +21,35 @@ const QUERY_STRING: &str = "
 
 pub struct LambdaAnalyzer {
     cloudwatch_logs_client: cloudwatch_logs::Client,
-    function_name: String,
+    log_group_name: String,
     start_time: i64,
 }
 
 impl LambdaAnalyzer {
     pub fn new(
         cloudwatch_logs_client: cloudwatch_logs::Client,
-        function_name: String,
+        log_group_name: String,
         start_time: i64,
     ) -> Self {
         Self {
             cloudwatch_logs_client,
-            function_name,
+            log_group_name,
             start_time,
         }
     }
 
     pub async fn analyze(&self) -> Result<Stats, anyhow::Error> {
-        let log_group_name = "/aws/lambda/logs-export-development-aws".to_string();
-        // format!("/aws/lambda/{}", self.function_name);
-        info!("Analyzing logs in log group: {}", log_group_name);
+        info!(
+            "Analyzing logs in log group: {}",
+            self.log_group_name.to_string()
+        );
+        self.check_log_group().await?;
+
         let query_id = self
             .cloudwatch_logs_client
             .start_query()
             .query_string(QUERY_STRING)
-            .log_group_name(log_group_name)
+            .log_group_name(self.log_group_name.to_string())
             .start_time(self.start_time)
             .end_time(chrono::Utc::now().timestamp())
             .send()
@@ -53,6 +57,22 @@ impl LambdaAnalyzer {
             .query_id
             .unwrap();
         self.query_until_complete(query_id).await
+    }
+
+    async fn check_log_group(&self) -> Result<(), anyhow::Error> {
+        let log_group = self
+            .cloudwatch_logs_client
+            .describe_log_groups()
+            .log_group_name_pattern(self.log_group_name.to_string())
+            .send()
+            .await?;
+        if log_group.log_groups.unwrap_or_else(|| vec![]).is_empty() {
+            return Err(anyhow::anyhow!(
+                "Log group {} does not exist",
+                self.log_group_name.to_string()
+            ));
+        }
+        Ok(())
     }
 
     #[async_recursion]

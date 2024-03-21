@@ -5,12 +5,13 @@ use tabled::Tabled;
 pub struct Stats {
     pub count: u32,
     pub min: f32,
-    pub max: f32,
     pub p50: f32,
     pub p75: f32,
     pub p99: f32,
     pub p995: f32,
     pub p999: f32,
+    pub max: f32,
+    pub stddev: f32,
 }
 
 impl Stats {
@@ -18,6 +19,9 @@ impl Stats {
         match result.field().unwrap().trim() {
             "count" => {
                 self.count = result.value().unwrap().parse().unwrap();
+            }
+            "stddev" => {
+                self.stddev = result.value().unwrap().parse().unwrap();
             }
             "min" => {
                 self.min = result.value().unwrap().parse().unwrap();
