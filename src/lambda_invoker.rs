@@ -23,7 +23,7 @@ impl LambdaInvoker {
         }
     }
 
-    pub async fn iterate(&self, iterations: u8) -> Result<(), anyhow::Error> {
+    pub async fn iterate(&self, iterations: u16) -> Result<(), anyhow::Error> {
         let config = self.get_function_configuration().await?;
         let mut env = config
             .environment
