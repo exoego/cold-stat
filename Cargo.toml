@@ -1,6 +1,6 @@
 [package]
 name = "cold-stat"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["TATSUNO Yasuhiro <ytatsuno.jp@gmail.com>"]
 license = "MIT"

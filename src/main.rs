@@ -39,7 +39,7 @@ struct Args {
         default_value_t = 100,
         help = "Number of iterations to invoke the function. It is recommended to set 30 at least. Because the number of collected cold starts often is a bit shorter than the specified `ITERATIONS` due to eventual consistency of CloudWatch Logs."
     )]
-    iterations: u8,
+    iterations: u16,
 
     #[arg(
         short,
