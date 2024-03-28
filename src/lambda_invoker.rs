@@ -23,7 +23,7 @@ impl LambdaInvoker {
         }
     }
 
-    pub async fn iterate(&self, iterations: u8) -> Result<(), anyhow::Error> {
+    pub async fn iterate(&self, iterations: u16) -> Result<(), anyhow::Error> {
         let config = self.get_function_configuration().await?;
         let mut env = config
             .environment
@@ -110,12 +110,8 @@ impl LambdaInvoker {
             Some(last_update_status) => {
                 info!("Checking if last update is successful: {last_update_status}");
                 match last_update_status {
-                    LastUpdateStatus::Successful => {
-                        Ok(true)
-                    }
-                    LastUpdateStatus::Failed | LastUpdateStatus::InProgress => {
-                        Ok(false)
-                    }
+                    LastUpdateStatus::Successful => Ok(true),
+                    LastUpdateStatus::Failed | LastUpdateStatus::InProgress => Ok(false),
                     unknown => {
                         warn!("LastUpdateStatus unknown: {unknown}");
                         Err(anyhow!("Unknown LastUpdateStatus, fn config is {config:?}"))
