@@ -58,7 +58,9 @@ impl LambdaInvoker {
             .payload(self.payload.clone())
             .send()
             .await?;
-        info!("Function error: {:?}", result.function_error);
+        result
+            .function_error()
+            .map(|e| warn!("Function error: {:?}", e));
         Ok(result.function_error.is_none())
     }
 
