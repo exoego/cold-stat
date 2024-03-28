@@ -110,12 +110,8 @@ impl LambdaInvoker {
             Some(last_update_status) => {
                 info!("Checking if last update is successful: {last_update_status}");
                 match last_update_status {
-                    LastUpdateStatus::Successful => {
-                        Ok(true)
-                    }
-                    LastUpdateStatus::Failed | LastUpdateStatus::InProgress => {
-                        Ok(false)
-                    }
+                    LastUpdateStatus::Successful => Ok(true),
+                    LastUpdateStatus::Failed | LastUpdateStatus::InProgress => Ok(false),
                     unknown => {
                         warn!("LastUpdateStatus unknown: {unknown}");
                         Err(anyhow!("Unknown LastUpdateStatus, fn config is {config:?}"))
