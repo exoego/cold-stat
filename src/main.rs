@@ -68,7 +68,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .unwrap();
     }
 
-    let config = aws_config::load_defaults(BehaviorVersion::v2023_11_09()).await;
+    let config = aws_config::load_defaults(BehaviorVersion::v2024_03_28()).await;
     let lambda = lambda::Client::new(&config);
     let lambda_invoker = LambdaInvoker::new(lambda.clone(), function.clone(), payload);
 
